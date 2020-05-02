@@ -1,0 +1,8 @@
+1. How to create sosreport in linux (RHEL 5.X / RHEL 6.X / RHEL 7.x)
+2. if lvm deleted how to recover 
+3. how to repair lvm
+
+4. How to clear computer’s RAM in Ubuntu:- 
+Ans:-   sync; echo 3 > /proc/sys/vm/drop_caches  #To free pagecache, dentries and inodes
+        echo 2 > /proc/sys/vm/drop_caches #To free dentries and inodes:
+	sync; echo 1 > /proc/sys/vm/drop_caches #echo 1 > /proc/sys/vm/drop_caches
