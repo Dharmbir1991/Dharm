@@ -1,3 +1,73 @@
 Devops
 ##########################################################################
 http://visualpath.in/devopstutorials/devops # Link to leran DevOps
+
+############################ Vagrant ##################################################
+Install virtual box to suport vagrant.
+Install vagrant
+
+vagrant cloud:- It is repository of vagrant boxes(Vagrant os image fie).
+
+mkdir jenkins
+
+cd jenkins
+
+vagrant init <boxname> # To download image from vagrant cloud.
+
+vagrant up # To start vagrant machine.
+
+vagrant ssh # To login OS.
+
+sudo -i # Provide password like "vagrant"
+
+vagrant box list  # To show all downloaded box.
+
+vagrant halt # To shutdown vagrant machine.
+
+vagrant destroy # To delete vagrant machine.
+
+vagrant up # To power on vagrant machine.
+
+vagrant box add <boxname> # Download box in system.
+
+vagrant box update <boxname> # To update bagrant box image.
+
+vagrant box remove <boxname> # To remove exixting box imge.
+
+vim Vagrantfile # Configuration part of vagrant file, where we made changes.
+
+Vagrant.configure(2) do |config| # Starting point of configuration file.
+
+
+end # Ending point of configuration file.
+
+Note:- Whenever we made changes in vagrant configuration file then we have to restart vagrant machine to make changes in VM.
+
+vagrant reload  # To restart vagrant VM.
+
+
+
+
+
+
+
+
+
+############################# Maven #####################################################3
+git clone https://github.com/wkhanvisualpathit/VProfile
+
+cd VProfile
+
+apt-get install openjdk-8-jdk -y
+
+apt install maven
+
+mvn install 
+
+########################################
+
+apt-get install openjdk-8-jdk -y
+
+apt install maven
+
+apt-get install jenkins -y
