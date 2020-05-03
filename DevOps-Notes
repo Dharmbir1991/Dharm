@@ -45,11 +45,83 @@ Note:- Whenever we made changes in vagrant configuration file then we have to re
 
 vagrant reload  # To restart vagrant VM.
 
+Bridge Network :- It is used to connect vagrant VM with physical machine network so that VM will communicate with internet.
+
+---------- How to connect vagrant VM with physical network ------------
+vim Vagrantfile
+
+# config.vm.network "public_network" # Uncomment the line.
+
+vagrant reload 
 
 
+----------------- How to increase RAM size of vagrant VM ----------------------
+vim Vagrantfile
+   config.vm.provider "virtualbox" do |vb|
+  #   # Display the VirtualBox GUI when booting the machine
+  #   vb.gui = true
+  #
+  #   Customize the amount of memory on the VM:
+     vb.memory = "2024"
+   end
 
+vagrant reload 
 
+------------------------------- Vagrant Provisioning ----------------------------------
+To execute commands when VM launching with the healp of Vagrnt provisioning.
 
+vim Vagrantfile
+  # config.vm.provision "shell", inline: <<-SHELL # Uncomment the line
+
+     sudo apt-get update # Update repository when vm provisioning.
+
+     sudo apt-get install -y apache2 # Install apache when vm provisioning.
+
+  # SHELL # Uncomment the line
+
+vagrant reload --provision
+
+------------------------- Sync Directory ------------------------------------
+
+vim Vagrantfile
+
+config.vm.synced_folder "data", "/opt/myscynfolder"
+
+# data:- We have created a folder on host machine which will mount with guest VM "/opt/myscynfolder"
+
+#/opt/myscynfolder :- This is the guest VM folder which is mounted with host machine.
+
+vagrant reload
+
+------------------------- Multi Machine  ------------------------------------
+
+vim Vagrantfile
+
+Vagrant.configure("2") do |config|
+  config.vm.provision "shell", inline: "echo Hello"
+
+  config.vm.define "web01" do |web01|
+    web01.vm.box = "ubuntu/xenial64"
+    web01.vm.network "public_network"
+  end
+
+  config.vm.define "db01" do |db01|
+    db01.vm.box = "ubuntu/xenial64"
+    db01.vm.network "public_network"
+  end
+end
+
+vagrant up web01
+
+vagrant up db01
+
+vagrant ssh db01
+
+vagrant ssh web01
+
+vagrant halt web01
+
+vagrant destroy web01
 
 
 
@@ -70,4 +142,8 @@ apt-get install openjdk-8-jdk -y
 
 apt install maven
 
-apt-get install jenkins -y
+wget -q -O - https://pkg.jenkins.io/debian/jenkins-ci.org.key | sudo apt-key add -
+sudo sh -c 'echo deb http://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list'
+sudo apt-get update
+sudo apt-get install jenkins
+
