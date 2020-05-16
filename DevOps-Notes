@@ -147,3 +147,18 @@ sudo sh -c 'echo deb http://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sour
 sudo apt-get update
 sudo apt-get install jenkins
 
+root@vagrant-ubuntu-trusty-64:~# cat /var/lib/jenkins/secrets/initialAdminPassword
+a94febad0574451fa6f8628bbd961b89
+
+User:- admin
+
+Password:- Dharm@32!
+
+################################# Nexus ######################################
+Install nexus plugin in jenkins server.
+
+Create a seperate instance and install nexus (Centos6)
+
+nexus runs on port:- 8080/8081
+
+
