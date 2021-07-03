@@ -1,0 +1,515 @@
+################## Chattr ##################
+ll fileName
+chattr +i fileName # To add chattr permissions.
+lschattr fileName # To verify chattr permissions.
+chattr -i fileName # Change/remove it to normal permissions.
+chattr +a fileName # Only new data can be added(append) to this file.
+ 
+################## How to configure Yum ####################################################
+Download ISO file from google.
+mkdir /mnt/iso
+sudo mount -o loop /path/to/my-iso-image.iso /mnt/iso
+df -Th
+umount /mnt/iso/
+                     OR
+cd /run/media/root/RHEL-7.0\ Server.x86_64/ # Copy all iso file to any folder
+mkdir /rhel
+cp -rf * /rhel/
+cd /etc/yum.repos.d/
+vim server.repo
+[server]
+name=This is my local yum server.
+baseurl=file:///rhel
+enabled=1
+gpgcheck=0
+
+yum clean all  # To check syntex of yum file
+yum list # To show all list of packages
+yum repolist  # To show count of packages in yum repository
+yum install <Package_Name> # To installed Packages
+yum search <Package_Name> # To check package is installed or not.
+yum remove  <Package_Name> # To remove Packages
+yum list installed  # To show installed Packages
+yum list all  # To show installed commands.
+yum history # To show history of installed and remove packages
+yum groups install <Package_Name>  # To installed group of packages
+yum groups remove <Package_Name>  # To remove group of packages
+yum update # To update packages
+
+sudo yum check-update
+
+yum -y update --security  # Security patches update
+
+ yum-config-manager --enable # displays the current repositoryconfiguration
+ 
+ yum-config-manager --disable \*  #To disable all repository
+ 
+ yum clean all
+ 
+ yum-config-manager --enable server #To enable 1 repository
+ 
+#################### How to configure yum in centos 8 #################################################
+
+blkid
+mkdir /test
+mount -t iso9660 -o loop /dev/sr0 /test
+df -Th
+
+mkdir /Repo
+cp -rf AppStream /Repo/
+cd /etc/yum.repos.d/
+
+vim /etc/yum.repos.d/centos8.repo
+[InstallMedia-BaseOS]
+name=CentOS Linux 8 - BaseOS
+gpgcheck=0
+enabled=1
+baseurl=file:///Repo/BaseOS/
+
+[InstallMedia-AppStream]
+name=CentOS Linux 8 - AppStream
+metadata_expire=-1
+gpgcheck=0
+enabled=1
+baseurl=file:///Repo/AppStream/
+
+
+yum clean all  # To check syntex of yum file
+yum list # To show all list of packages
+yum repolist  # To show count of packages in yum repository
+
+########################################################################################################################
+ 
+################ How to clear the contents of a log file from the command line ############
+ 
+ # >/var/log/messages
+ 
+#############How to extend partition size of Linux which is running on hypervisor #############################################################
+1. Shutdown the machine
+2. Increase size from hypervisor
+3. Login to machine and check size is incresed or not. if size is not increased then run below mentioned command.
+lsblk
+growpart /dev/xvda #command to resize the partition
+
+resize2fs /dev/xvda1 #It is used to extend(Resize) the ext2, ext3, or ext4 filesystem.
+
+xfs_growfs  /dev/xvda1 # It is used to extend(Resize) the XFS filesystem.
+ 
+################################# NFS ######################################################################################################## 
+nfs
+rpcbind
+
+NFS=Network File System
+-> It is used to share files in Linux and Unix OS.
+RHEL-7 support two version of NFS
+NFS-v3
+NFS-v4
+
+NFS default port:- 2049
+NFS always works with RPC
+
+Importan Services for NFS:-
+rpcbind
+nfs.server
+nfs-lock
+rpc-statd
+nfs-idmap
+rpc.mountd
+rpc.idmapd
+rpc.rquqtad
+rpc.nfsd
+RPC
+
+
+Portmaper defualt port :- 111
+rpcinfo -p  #It will show the port number that are assigned to the rpc service.
+
+Services running on NFS server:-
+nfsd
+rpcbind
+rpc.statd
+rpc.idmapd
+rpc.rquqtad
+rpc.mountd
+
+Services running on NFS Client:-
+nfsiod
+rpcbind
+
+Stateless protocol= No acknowledgement for data send and recieve
+Statefull protocol= Acknowledgement for data send and recieve
+
+Server profile:-
+Package:- nfs-utils, rpcbind
+Daemon:- mfs.service
+Port no:- 2049
+Config File Path:- /etc/exports, /etc/sysconfig/nfs
+
+NFS Server side configuration:-
+
+yum install nfs-utils rpcbind libnfssidmap
+
+systemctl start rpcbind
+systemctl enable rpcbind
+systemctl start nfs-server
+systemctl enable nfs-server
+systemctl start nfs-lock
+systemctl start nfs-idmap
+systemctl start rpc.statd
+systemctl start rpc.idmapd
+
+/etc/exports :- It is controls which file system exported to remote hosts and specific options.
+
+
+rw:- Writable permissions to share folders
+sync:- All changes sync to disk.
+no_root_squash:- Assign file system permissions to root user for make any changes in shared file as server root user otherwise get permission errors.
+
+/etc/fstab :- Mount directory permamently
+
+/etc/sysconfig/nfs :- This file is used to control which ports the required RPC service run on.
+
+exportfs -v :- Display a list of shared files and export options on a server
+exportfs -a :- Export all directoris listed in /etc/exports
+exportfs -u :- Unexports one or more directoris
+exportfs -r :- Reexports all directoris after modifying /etc/exports
+
+
+------------ LAB --------------------------
+On Server:- 
+
+yum install nfs-utils rpcbind libnfssidmap
+
+systemctl start rpcbind
+systemctl enable rpcbind
+systemctl start nfs-server
+systemctl enable nfs-server
+systemctl start nfs-idmap
+systemctl start rpc.statd
+systemctl start rpc.idmapd
+
+mkdir /oradb
+vim /etc/exports
+/oradb 192.168.0.2(rw,sync,no_root_squash)
+
+exportfs -r
+exportfs -v # To show list of shared folders.
+--------------------------------------
+On client Machine :-
+showmount -e 192.168.0.1  # To show all shared folders on nfs server.
+
+mkdir /oradbnew
+mount -t nfs 192.168.0.2:/oradb  /oradbnew # To mount nfs shared directory.
+df -Th # To show mount directory
+mount |grep nfs # To show mount directory
+vim /etc/fstab
+192.168.0.2:/oradb  /oradbnew nfs defaults 0 0
+
+############################# Firewalld ############################
+
+systemctl disable SuSEfirewall2_setup.service
+
+https://sahlitech.com/configure-static-ip-on-suse-linux/#:~:text=IP%20Configuration%20can%20be%20achieved,methods%20will%20be%20listed%20here.
+route add default gw 10.1.0.1 eth0  # Tem added route in Pogressive sap server.
+
+Adding default Gateway in Linux SUSE:- https://www.lazysystemadmin.com/2012/08/changing-default-gateway-in-suse-linux.html#:~:text=To%20change%20the%20default%20route,sysconfig%2Fnetwork%2Froutes%20file.
+vim /etc/sysconfig/network/routes
+default 10.1.0.1
+
+-----
+vim /etc/resolv.conf.
+nameserver 10.1.0.21
+nameserver 1.0.0.1
+
+
+
+------------------ MAC Address Issue ---------------------------------
+https://www.techlanda.com/2016/08/error-no-suitable-device-found.html
+
+cat /etc/sysconfig/network-scripts/ifcfg-eth0
+service network restart
+
+https://www.unixmen.com/fix-device-eth0-seem-present-delaying-initialization-error/
+
+---------------------- How to activate suse linux ----------------------------------
+SUSEConnect -r <YourActivationCode> -e <YourEmailAddress>
+SUSEConnect -r 41A947DA47E1A525 -e dharmbir.soni@progressive.in
+
+------------------------------------------------------------------------------------
+
+----------------------------------------------------------------------------------------
+https://www.leaderssl.com/news/471-how-to-disable-outdated-versions-of-ssl-tls-in-apache
+https://www.vmadmin.co.uk/linux/44-redhat/218-linuxhttptracktrace
+https://communities.sas.com/t5/Administration-and-Deployment/Apache-Web-Server-ETag-Header-Information-Disclosure/td-p/371149#
+--------------------------------------------------------------------------------------------
+https://www.tecmint.com/zypper-commands-to-manage-suse-linux-package-management/
+
+ssl checker:-
+https://www.sslshopper.com/ -> SSL Tools -> 
+CSR Decoder
+Certficate key Matcher
+-----------------------------------------------------
+
+mkdir  /ssl
+mkdir /ssl/oculist
+cd /ssl/oculist
+
+openssl req -new -newkey rsa:2048 -nodes -keyout <Domain-Name.key> -out <Domain-Name.csr> # To generate "CSR" files.
+
+openssl req -new -newkey rsa:2048 -nodes -keyout oculist.key -out oculist.csr
+
+Country Name:-
+State or Province Name:-
+Locality Name (eg, city):-
+Organization Name (eg, company):-
+Organizational Unit Name (eg, section):-
+Common Name (e.g. server FQDN or YOUR name):-
+Email Address:-
+
+ls -ltr
+oculist.csr
+oculist.key
+
+cat oculist.csr  #Copy all lines and paste to godaddy portal for create certificate and bundle file.
+-----BEGIN CERTIFICATE REQUEST-----
+MIIC6zCCAdMCAQAwgaUxCzAJBgNVBAYTAlVLMQ4wDAYDVQQIDAVFc3NleDERMA8G
+A1UEBwwIUmF5bGVpZ2gxJjAkBgNVBAoMHUJsYWNrU3F1YXJlIFNvbHV0aW9ucyBM
+aW1pdGVkMQ4wDAYDVQQLDAVMb2N1bTEWMBQGA1UEAwwNb2N1bGlzdC5jby51azEj
+MCEGCSqGSIb3DQEJARYUaGVsbG9AYmxhY2stc3EuY28udWswggEiMA0GCSqGSIb3
+DQEBAQUAA4IBDwAwggEKAoIBAQDE/FjllJrtrqQdQCRy6YIgURzS1AK3fxrKTHtZ
+cE6YXJw1+P5DrtLAcw5Mv161MEkguukr/tR3UZxkrE4IfnXKmJH0v+jnvccEyC8e
+YB1e1Yis1NClTOvEB0PHauepYx7NYOIsgBPsuWjDEuy5T0x7HE+UAzDn5pr5EvIO
+4qpMkDq4m07QqeM/EA914Yug5woUWreiz7YdxRrb/ICyhmdICgQDYSGkdimyBXOJ
+fbDZrL06FulfDGGTUF6DK9amdzJ+coyPbTh4oQcX6tYmDksCshyp6QGOv2QVPbrT
+Kn4IyIjDo8J5rdaeV/7LU/fg59qLGhLuKoJ9EPDEeUBx1b23AgMBAAGgADANBgkq
+hkiG9w0BAQsFAAOCAQEAQloYv0bBjoIRfhynux6lltLAqUfTGeZtHZlBhbwM7UsD
+sJ6v+YQzvsiOEftWfkCClvkeAsnLTd77kAlrL2lMvcPuQZDW9cGrcFrvN5NCiH+6
+kZUFiE9WD3Hjt6ykYzCEBXXRo3nZIOsySTIDQvHQQU+xmaZVnCObaXJKGthpeP1G
+n5LZ2OcAuT5dTMTjIU6pEfMaAY2xjB4tbIs+LPOqR5rjOG4sFIQ+Xw27Cxr2jXTM
+vu4+w9obNS4/2943QhYfsh9ymdS0uWYOc8QAPGxyLHK8FreRbHY1hQrD1uFWoKQD
+umQRfEqDWD4AxmDr5Ig6+cZOvYSSNCukOYjIwoc4qA==
+-----END CERTIFICATE REQUEST-----
+
+Once approved SSL certificate.
+Select "apache2" from "server type" and click on download zip file.
+Now copy and paste zip file to the server. like on the path"/ssl/oculist"
+
+cd /ssl/oculist
+ls -ltr
+unzip oculist.co.uk.zip
+ls -ltr
+gd_bundle-g2-g1.crt
+f358fcb3d076fced.pem
+f358fcb3d076fced.crt
+oculist.key
+oculist.csr
+oculist.co.uk.zip
+
+
+cd /etc/apache2/sites-enabled
+cp -p 000-default.conf 000-default.conf-bk-14-06-2019 # Create backup file of configuration file.
+
+vim 000-default.conf
+# Copy virtual host block and paste same block in same file and add SSLCertificateFile 3 lines and change port to 443.
+#We are creating new block so that website can run on port 80 and port 443.
+<Virtualhost *:443>
+<Directory /var/www/html>
+          Options Indexes FollowSymLinks MultiViews
+          AllowOverride All
+          Require all granted
+        </Directory>
+
+        ServerAdmin webmaster@localhost
+        DocumentRoot /var/www/html
+        SSLEngine on
+        SSLCertificateFile /ssl/oculist/f358fcb3d076fced.crt
+        SSLCertificateKeyfile /ssl/oculist/oculist.key
+        SSLCACertificateFile /ssl/oculist/gd_bundle-g2-g1.crt
+        # Available loglevels: trace8, ..., trace1, debug, info, notice, warn,
+        # error, crit, alert, emerg.
+        # It is also possible to configure the loglevel for particular
+        # modules, e.g.
+        #LogLevel info ssl:warn
+
+        ErrorLog ${APACHE_LOG_DIR}/error.log
+        CustomLog ${APACHE_LOG_DIR}/access.log combined
+</Virtualhost>
+
+a2enmod ssl # Enable ssl
+
+systemctl restart apache2
+
+systemctl enable apache2
+
+-------------------------- skywalking ----------------------------------------------
+https://www.alibabacloud.com/help/doc-detail/161783.htm
+https://www.programmersought.com/article/96974969740/
+-------------------------------------------------------------------------------------
+
+https://www.unixmen.com/install-latest-stable-kernel-centos-6-7/
+
+https://www.youtube.com/watch?v=SYepaGkzxwE
+
+-------------- How to clera RAM utilization ----------------------------------------------
+
+sync; echo 1 > /proc/sys/vm/drop_caches
+
+echo 1 # will clear page cache
+
+echo 2 # will clear page cache and buffer memory 
+
+echo 2 # will clear page cache and buffer memory , physical memory and swap memory without stopping any application.
+
+----------------------------------- AWS ----------------------------------------------------------------------------------
+aws --version # To check aws cli is installed or not
+
+aws configure  # To configure access and secret key
+
+aws s3 ls s3://BUCKET-NAME/ --recursive | grep FILE-NAME.TXT
+
+----------------------------------------------------------------------------------------------------------------------------
+
+systemctl restart  ncpa_listner.service  # To restart nagios agent.
+
+--------------------------------------------------------------------------------------------------------------------------------
+
+----------------------- NTP Server ----------------------------------------------------------------------------------------------
+https://linuxconfig.org/ubuntu-20-04-ntp-server
+https://www.pool.ntp.org/zone/asia
+https://linuxways.net/ubuntu/how-to-configure-an-ntp-server-on-ubuntu-20-04-lts-and-sync-a-clock/
+https://www.youtube.com/watch?v=evQLNWkSM_g
+
+
+PROG-HO-NTP-CNT-LINUX
+
+SR93735 # Need to check 
+
+https://www.cyberciti.biz/faq/linux-unix-bsd-is-ntp-client-working/
+
+------------------------------------------------------------------------------------------------------------------------------
+
+------------------------------- Rsyslog Server --------------------------------------------------------------------------------
+	
+https://www.howtoforge.com/how-to-setup-rsyslog-server-on-ubuntu-1804/
+
+https://kifarunix.com/how-to-configure-remote-logging-with-rsyslog-on-ubuntu-18-04/
+
+------------------------------------------------------------------------------------------------------------------------------------
+https://www.server-world.info/en/note?os=SUSE_Linux_Enterprise_Server_11&p=first_conf&f=1
+
+How to user add in suse OS
+useradd -m suse
+passwd suse
+
+--------------------------------------
+
+To exit the Telnet session, type Ctrl + ] on your keyboard. This changes the command prompt to show as telnet>. Back in the terminal, type in the word 'close' to close the
+
+---------------------------------------------------------------------------------------------------------
+
+ /usr/sbin/SUSEConnect --status  # To check suse is registered or not
+ 
+Deregistereing suse steps
+
+# SUSEConnect --de-register
+# SUSEConnect --cleanup
+# rm -rf /etc/SUSEConnect
+# rm -rf /etc/zypp/credentials.d/*
+# rm -rf /etc/zypp/repos.d/*
+# rm -rf /etc/zypp/services.d/*
+then
+in YaST - Software -> Add-on Products -> delete everything and "Run Software Manager"
+then you just register the server again using the following command SUSEConnect -r <YourActivationCode>
+
+Pr#^og9%-------------------------------------------------------------------------------------------------------------------
+How to configure vnc in RHEL 5.6 
+https://wiki.centos.org/HowTos/VNC-Server
+
+-----------------------------------------------------------------------------------------------------------------------------
+
+
+In-depth knowledge of Unix OS platforms (RHEL & OEL) & strong troubleshooting skills
+Linux Filesystem, file permissions & ownership 
+Knowledge of boot process & control 
+Knowledge of Run level & troubleshoot issues related to specific service 
+OS performance checks & troubleshooting performance issue 
+In-depth knowledge of LVM/VG/PV and troubleshooting skills 
+ACL management 
+User/Group management & sudo access 
+Understanding of crontab and scheduling of jobs
+Multipath configuration and management 
+Network File Sharing Services; NFS and CIFS
+Network configuration/management & troubleshooting (configuring bonding, vlan tagging) 
+Patching through Satellite & Client-side yum configuration 
+Satellite server configuration & management 
+Knowledge of different hardware architecture (HP, Dell, CISCO servers) and implementation 
+Management of Linux servers and hypervisors like OVM server, VMware ESXi 
+Adapt to projects, programs or methods based on customer or business partner feedback 
+Server management including migration and consolidation
+
+
+--------------------
+
+df -Th # To check free space
+df -i  # To check free inode.
+
+--------------- --------------------------
+How to configure SSL on suse apache server.
+
+As per your request, please feel free to refer our documentation (https://documentation.suse.com/sles/12-SP4/html/SLES-all/cha-apache2.html#sec-apache2-ssl) to setup a SSL on your apache server
+
+--------------------------------
+
+05May@2021
+
+
+
+######################################## AWS S3 #####################################################################
+
+PROG-PROD-SAP:~ # aws configure
+AWS Access Key ID [****************HBNB]: AKIAXTUJ5P3PV5D4MTXL
+AWS Secret Access Key [****************kfdT]: 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
+Default region name [ap-south-1]:
+Default output format [table]:
+
+aws --version
+aws configure
+aws s3 ls
+aws s3 ls databaseprogressive/
+aws s3 cp s3://databaseprogressive/NSIPRE_AUTOMATION_LLC NSIPRE_AUTOMATION_LLC --recursive
+aws s3 cp s3://databaseprogressive/PROGRESSIVE_INFO_LTD/ PROGRESSIVE_INFO_LTD --recursive
+aws s3 cp s3://databaseprogressive/jsbsoftware jsbsoftware --recursive
+
+
+Hi Dharmbir
+Going forward use below keyword for fast response from Cloud Support Team ( Only one parameter for fast response)
+
+	Production System Down: “#Severity:Critical” 
+	Production System Impaired: “#Severity:High” 
+
+#################### How to start SAP Application after Reboot the server ######################################################################
+PROG-PROD-SAP:~ # su - ndbadm
+ndbadm@PROG-PROD-SAP:/usr/sap/NDB/HDB00> ./HDB start
+exit
+systemctl start sapb1servertools.service
+
+#######################################################################################################################
+
+
+################# How to install Maven and integrate maven with Jenkins in Ubuntu ############################################################
+
+download maven and select the particular version like Binary tar.gz archive(apache-maven-3.8.1-bin.tar.gz)
+cd /opt/
+wget https://mirrors.estointernet.in/apache/maven/maven-3/3.8.1/binaries/apache-maven-3.8.1-bin.tar.gz
+tar -xf apache-maven-3.8.1-bin.tar.gz
+Go jenkins dashboard -> Manage Jenkins -> Global configuration -> Maven section
+Name:- maven3.8
+MAVEN_HOME:- /opt/apache-maven-3.8.1
+Apply and save
+mvn -version
+cd  /opt/apache-maven-3.8.1/bin
+./mvn
+ln -s /opt/apache-maven-3.8.1/bin/mvn /bin # This command is now available directly from all users
+
+####################################################################################################################################################
+
